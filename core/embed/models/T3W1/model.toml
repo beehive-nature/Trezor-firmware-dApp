@@ -29,4 +29,5 @@ features = [
     "touch_wakeup",
     "layout_eckhart",
     "display_rgba8888",
+    "eos",
 ]

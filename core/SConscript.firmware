@@ -138,7 +138,7 @@ CPPDEFINES_MOD += [
     ('USE_MONERO', '1' if EVERYTHING else '0'),
     ('USE_CARDANO', '1' if EVERYTHING else '0'),
     ('USE_NEM', '1' if (EVERYTHING and TREZOR_MODEL == "T2T1") else '0'),
-    ('USE_EOS', '1' if (EVERYTHING and TREZOR_MODEL == "T2T1") else '0'),
+    ('USE_EOS', '1' if EVERYTHING else '0'),
     ('MICROPY_ENABLE_SOURCE_LINE', '1' if MICROPY_ENABLE_SOURCE_LINE else '0'),
     ('DISABLE_ANIMATION', '1' if DISABLE_ANIMATION else '0'),
     ('LOG_STACK_USAGE', '1' if LOG_STACK_USAGE else '0'),
@@ -800,10 +800,9 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/cardano/*/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Cardano*.py'))
 
-        if TREZOR_MODEL == "T2T1":
-            SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/eos/*.py'))
-            SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/eos/*/*.py'))
-            SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Eos*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/eos/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/eos/*/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Eos*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/ethereum/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Ethereum*.py'))
