@@ -1,0 +1,13 @@
+[package]
+name = "zano-proof"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zeroize = { version = "1.8", features = ["derive"], default-features = false }
+
+[build-dependencies]
+bindgen = "0.70"
+cc = "1.0"
+
+[workspace]

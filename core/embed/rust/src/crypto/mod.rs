@@ -13,6 +13,7 @@ pub mod memory;
 pub mod merkle;
 pub mod sha256;
 pub mod sha512;
+pub mod zano;
 
 #[cfg_attr(feature = "test", derive(core::fmt::Debug))]
 pub enum Error {

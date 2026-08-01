@@ -15,3 +15,5 @@ crypto/tests/libtrezor-crypto.so.dSYM/
 .hypothesis/
 /.clangd
 /.tf-tools
+crypto/zano/rust-proof/target/
+crypto/zano/rust-proof/Cargo.lock

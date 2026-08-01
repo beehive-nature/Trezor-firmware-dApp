@@ -646,6 +646,23 @@ fn generate_crypto_bindings() {
         .allowlist_function("ed25519_sign_open")
         // elligator2
         .allowlist_function("map_to_curve_elligator2_curve25519")
+        // zano — CLSAG_GGX ring signatures. The signing mathematics stays in C
+        // (crypto/zano/clsag_ggx.c) because it is bidirectionally conformant against
+        // hyle-team/zano; Rust owns the secret handling above it, where ZeroizeOnDrop
+        // can be enforced by the compiler and MicroPython cannot promise anything.
+        .allowlist_type("zano_ring_member")
+        .allowlist_type("zano_clsag_ggx_sig")
+        .allowlist_function("zano_generators_init")
+        .allowlist_function("zano_generate_clsag_ggx")
+        .allowlist_function("zano_verify_clsag_ggx")
+        // donna primitives the zano wrapper needs to marshal wire form <-> internals
+        .allowlist_type("bignum256modm")
+        .allowlist_type("bignum256modm_element_t")
+        .allowlist_type("ge25519")
+        .allowlist_function("expand256_modm")
+        .allowlist_function("contract256_modm")
+        .allowlist_function("ge25519_unpack_vartime")
+        .allowlist_function("ge25519_pack")
         // hmac
         .allowlist_type("HMAC_SHA256_CTX")
         .no_copy("HMAC_SHA256_CTX")
