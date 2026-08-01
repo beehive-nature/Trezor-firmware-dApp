@@ -40,6 +40,15 @@ message ZanoGetAddress {
 }
 
 /**
+ * Note on derivation, since it is easy to expect otherwise: the spend key comes from
+ * the BIP-32 node at address_n and the view key is cn_fast_hash(spend) reduced, which
+ * is what the reference's dependent_key() does and identical to Monero's convention.
+ * A Zano wallet restored from a 25-word CryptoNote seed will therefore NOT produce
+ * this address, the same way it will not reproduce a Trezor Monero address. The
+ * address is correct and spendable; it is simply Trezor-derived.
+ */
+
+/**
  * Response: Contains a Zano address derived from the device seed
  * @end
  */

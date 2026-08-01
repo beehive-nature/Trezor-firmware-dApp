@@ -170,6 +170,11 @@ def _find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.EthereumSignTypedData:
             return "apps.ethereum.sign_typed_data"
 
+        # zano — shares monero's key derivation, so it lives behind the same build
+        # condition; only the address encoding differs.
+        if msg_type == MessageType.ZanoGetAddress:
+            return "apps.zano.get_address"
+
         # monero
         if msg_type == MessageType.MoneroGetAddress:
             return "apps.monero.get_address"

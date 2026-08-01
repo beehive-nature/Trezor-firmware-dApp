@@ -834,6 +834,11 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/DebugMonero*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Monero*.py'))
 
+        # zano — after monero deliberately: apps/zano/get_address.py imports
+        # apps.monero.xmr.monero for the shared key derivation.
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/zano/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Zano*.py'))
+
         if TREZOR_MODEL == "T2T1":
             SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/nem/*.py'))
             SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/nem/*/*.py'))
@@ -966,6 +971,9 @@ if PYOPT == '0':
     features.append('ui_debug_overlay')
 if EVERYTHING:
     features.append('universal_fw')
+    # Enabled with the same condition that builds crypto/zano/*.c above, so the Rust
+    # is never compiled without the C it links against.
+    features.append('zano')
 if not PRODUCTION:
     features.append('dev_keys')
 if THP:

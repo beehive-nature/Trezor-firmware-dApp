@@ -8,6 +8,11 @@ build = "build.rs"
 [features]
 default = ["layout_bolt"]
 crypto = ["dep:zeroize"]
+# Zano CLSAG_GGX. Gates the Rust so it is never compiled without the C it calls:
+# crypto/zano/*.c only builds under EVERYTHING, and zano.rs referencing symbols that
+# were never built is a link error at the very end of a long build. It also needs
+# monero's xmr_hash_to_ec, so the two are enabled together or not at all.
+zano = ["crypto"]
 layout_bolt = []
 layout_caesar = []
 layout_delizia = []

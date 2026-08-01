@@ -66,6 +66,7 @@ dbg_console = ["trezor_lib/dbg_console"]
 app_loading = ["trezor_lib/app_loading"]
 universal_fw = ["trezor_lib/universal_fw"]
 thp = ["trezor_lib/thp"]
+zano = ["trezor_lib/zano"]
 
 [dependencies]
 trezor_lib = { workspace = true, default-features = false }

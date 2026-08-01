@@ -405,4 +405,11 @@ enum MessageType {
     // Telemetry
     MessageType_TelemetryGet = 1100 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_Telemetry = 1101 [(bitcoin_only) = true, (wire_out) = true];
+
+    // Zano. 1200-block chosen to sit clear of the altcoin ranges below 1000 and of
+    // the 9000 debug/benchmark block. Address messages only; signing is not specified
+    // yet - see messages-zano.proto for why the blinding factors make that a
+    // transaction-construction problem rather than a ring-signature one.
+    MessageType_ZanoGetAddress = 1200 [(wire_in) = true];
+    MessageType_ZanoAddress = 1201 [(wire_out) = true];
 }

@@ -303,3 +303,5 @@ if not utils.BITCOIN_ONLY:
     TronWithdrawUnfreeze = 2209
     TronVoteWitnessContract = 2210
     TronWithdrawBalance = 2213
+    ZanoGetAddress = 1200
+    ZanoAddress = 1201

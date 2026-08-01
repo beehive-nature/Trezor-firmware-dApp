@@ -7955,3 +7955,35 @@ if TYPE_CHECKING:
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["WebAuthnCredential"]:
             return isinstance(msg, cls)
+
+    class ZanoGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        chunkify: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            chunkify: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["ZanoGetAddress"]:
+            return isinstance(msg, cls)
+
+    class ZanoAddress(protobuf.MessageType):
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["ZanoAddress"]:
+            return isinstance(msg, cls)
