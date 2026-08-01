@@ -193,6 +193,10 @@ if EVERYTHING:
         'vendor/trezor-crypto/monero/base58.c',
         'vendor/trezor-crypto/monero/serialize.c',
         'vendor/trezor-crypto/monero/xmr.c',
+        # Zano CLSAG_GGX. Grouped with monero because zano_hp() calls
+        # xmr_hash_to_ec, so this must not be enabled without those above it.
+        'vendor/trezor-crypto/zano/clsag_ggx.c',
+        'vendor/trezor-crypto/zano/zano_generators.c',
     ]
 
 # libsecp256k1-zkp

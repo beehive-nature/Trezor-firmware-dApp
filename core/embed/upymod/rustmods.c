@@ -40,6 +40,10 @@ MP_REGISTER_MODULE(MP_QSTR_trezorble, mp_module_trezorble);
 MP_REGISTER_MODULE(MP_QSTR_trezorthp, mp_module_trezorthp);
 #endif
 
+#ifdef USE_MONERO
+MP_REGISTER_MODULE(MP_QSTR_trezorzano, mp_module_trezorzano);
+#endif
+
 #if defined(TREZOR_EMULATOR) && PYOPT == 0
 MP_REGISTER_MODULE(MP_QSTR_coveragedata, mp_module_coveragedata);
 #endif

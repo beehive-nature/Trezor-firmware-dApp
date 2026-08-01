@@ -13,6 +13,12 @@ extern mp_obj_module_t mp_module_trezortranslate;
 extern mp_obj_module_t mp_module_trezorble;
 extern mp_obj_module_t mp_module_trezorthp;
 
+#ifdef USE_MONERO
+// Zano CLSAG_GGX. Gated on USE_MONERO because zano_hp() calls xmr_hash_to_ec, so the
+// monero crypto sources are a hard prerequisite, not a coincidence of packaging.
+extern mp_obj_module_t mp_module_trezorzano;
+#endif
+
 #ifdef USE_DBG_CONSOLE
 extern mp_obj_module_t mp_module_trezorlog;
 #endif
