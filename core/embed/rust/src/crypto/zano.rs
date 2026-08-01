@@ -76,6 +76,11 @@ pub struct RingMember {
 }
 
 /// A produced signature, in wire form.
+///
+/// `Debug` is derived here and deliberately NOT on `Scalar` or `SpendSecrets`: a
+/// signature is public the moment it is broadcast, whereas a printable secret is one
+/// stray log line away from being an extracted spend key.
+#[derive(Debug, PartialEq, Eq)]
 pub struct Signature {
     pub c: [u8; 32],
     pub r_g: [[u8; 32]; MAX_RING_SIZE],
@@ -99,6 +104,115 @@ pub fn init() -> Result<(), Error> {
     } else {
         Err(Error::InvalidContext)
     }
+}
+
+/// Produce a CLSAG_GGX signature.
+///
+/// `secrets` is consumed. It is moved in, used, and dropped before this returns, so
+/// the caller cannot hold a live copy afterwards and the limbs are wiped on the way
+/// out. That is the guarantee this layer can actually make.
+///
+/// It is NOT a claim that the spend secret never existed elsewhere. Trezor derives
+/// keys in `apps.common.keychain`, which is MicroPython, so by the time bytes arrive
+/// here the interpreter has already held them and may have copied them. Closing that
+/// gap means moving derivation itself below the Python boundary — worth doing, and
+/// not done here. Anything stronger stated about this function would be false.
+///
+/// `pseudo_out_*` are NOT premultiplied by 1/8 on the sign side, unlike `verify`.
+/// The asymmetry is Zano's, not an oversight; see clsag_ggx.h.
+pub fn sign(
+    message_hash: &[u8; 32],
+    ring: &[RingMember],
+    pseudo_out_amount_commitment: &[u8; 32],
+    pseudo_out_asset_id: &[u8; 32],
+    key_image: &[u8; 32],
+    secrets: SpendSecrets,
+    secret_index: usize,
+) -> Result<Signature, Error> {
+    if ring.is_empty() || ring.len() > MAX_RING_SIZE || secret_index >= ring.len() {
+        return Err(Error::InvalidParams);
+    }
+
+    // SAFETY: POD scratch, fully written below before use.
+    let mut members: [ffi::zano_ring_member; MAX_RING_SIZE] = unsafe { core::mem::zeroed() };
+    let mut pc: ffi::ge25519 = unsafe { core::mem::zeroed() };
+    let mut pa: ffi::ge25519 = unsafe { core::mem::zeroed() };
+    let mut ki: ffi::ge25519 = unsafe { core::mem::zeroed() };
+
+    for (i, m) in ring.iter().enumerate() {
+        // SAFETY: ffi; fixed 32-byte inputs. Returns 1 on SUCCESS.
+        unsafe {
+            if ffi::ge25519_unpack_vartime(
+                &mut members[i].stealth_address_pt,
+                m.stealth_address.as_ptr(),
+            ) == 0
+            {
+                return Err(Error::InvalidEncoding);
+            }
+        }
+        members[i].amount_commitment = m.amount_commitment_div8;
+        members[i].blinded_asset_id = m.blinded_asset_id_div8;
+    }
+
+    // SAFETY: ffi; each is a fixed 32-byte compressed point.
+    unsafe {
+        if ffi::ge25519_unpack_vartime(&mut pc, pseudo_out_amount_commitment.as_ptr()) == 0
+            || ffi::ge25519_unpack_vartime(&mut pa, pseudo_out_asset_id.as_ptr()) == 0
+            || ffi::ge25519_unpack_vartime(&mut ki, key_image.as_ptr()) == 0
+        {
+            return Err(Error::InvalidEncoding);
+        }
+    }
+
+    let mut r_g: [ffi::bignum256modm; MAX_RING_SIZE] = unsafe { core::mem::zeroed() };
+    let mut r_x: [ffi::bignum256modm; MAX_RING_SIZE] = unsafe { core::mem::zeroed() };
+    let mut raw = ffi::zano_clsag_ggx_sig {
+        c: unsafe { core::mem::zeroed() },
+        r_g: r_g.as_mut_ptr(),
+        r_x: r_x.as_mut_ptr(),
+        K1: [0u8; 32],
+        K2: [0u8; 32],
+    };
+
+    // SAFETY: ffi; `members` holds ring.len() initialised entries and the response
+    // arrays are at least that long. `secrets` outlives the call and is dropped
+    // (and wiped) at the end of this function.
+    let ok = unsafe {
+        ffi::zano_generate_clsag_ggx(
+            message_hash.as_ptr(),
+            members.as_ptr(),
+            ring.len(),
+            &pc,
+            &pa,
+            &ki,
+            secrets.spend.as_ptr(),
+            secrets.amount_blind.as_ptr(),
+            secrets.asset.as_ptr(),
+            secret_index,
+            &mut raw,
+        )
+    };
+    if !ok {
+        return Err(Error::InvalidParams);
+    }
+
+    let mut sig = Signature {
+        c: [0u8; 32],
+        r_g: [[0u8; 32]; MAX_RING_SIZE],
+        r_x: [[0u8; 32]; MAX_RING_SIZE],
+        k1: raw.K1,
+        k2: raw.K2,
+        ring_size: ring.len(),
+    };
+    // SAFETY: ffi; contract256_modm writes exactly 32 bytes.
+    unsafe {
+        ffi::contract256_modm(sig.c.as_mut_ptr(), raw.c.as_ptr());
+        for i in 0..ring.len() {
+            ffi::contract256_modm(sig.r_g[i].as_mut_ptr(), r_g[i].as_ptr());
+            ffi::contract256_modm(sig.r_x[i].as_mut_ptr(), r_x[i].as_ptr());
+        }
+    }
+    Ok(sig)
 }
 
 /// Verify a CLSAG_GGX signature.

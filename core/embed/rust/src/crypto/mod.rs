@@ -14,6 +14,12 @@ pub mod merkle;
 pub mod sha256;
 pub mod sha512;
 pub mod zano;
+// UNCOMPILED. Written to the obj_module!/obj_fn_kw pattern and every API it uses was
+// checked to exist, but it needs the micropython feature, which needs SCons-generated
+// qstrs and headers. It has never been through a compiler. Gated so it cannot break a
+// build that does not ask for it; do not treat it as working until a firmware build says so.
+#[cfg(feature = "micropython")]
+pub mod zano_micropython;
 
 #[cfg_attr(feature = "test", derive(core::fmt::Debug))]
 pub enum Error {

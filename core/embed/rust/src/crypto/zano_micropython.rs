@@ -1,0 +1,172 @@
+//! MicroPython surface for Zano CLSAG_GGX.
+//!
+//! WHERE THE BOUNDARY IS DRAWN, AND WHY
+//!
+//! One call does the whole signature. Python hands in the ring, the message, the
+//! pseudo-outs, the key image and the three secrets; Rust marshals, signs, wipes, and
+//! returns wire bytes. Python never sees a scalar, an intermediate, or the challenge
+//! before it is final, so there is no partial state for interpreter-side code to hold
+//! or leak, and no way to drive the signer into an inconsistent sequence.
+//!
+//! What this does NOT do — stated plainly, because the opposite is easy to imply:
+//! Trezor derives keys in `apps.common.keychain`, which is MicroPython. By the time
+//! secret bytes reach this module the interpreter has already held them and may have
+//! copied them, and nothing here can retract that. What is guaranteed is narrower and
+//! real: the Rust-side copy is typed, moved, used once, and wiped by ZeroizeOnDrop.
+//! Closing the remaining gap means moving derivation below the Python boundary. That
+//! is worth doing and is not done here.
+
+use crate::micropython::{
+    buffer::get_buffer,
+    macros::{obj_fn_0, obj_fn_kw, obj_module},
+    map::Map,
+    module::Module,
+    obj::Obj,
+    qstr::Qstr,
+    util,
+};
+
+use super::zano::{self, RingMember, Scalar, Signature, SpendSecrets, MAX_RING_SIZE};
+
+/// Pull exactly 32 bytes out of a Python buffer, refusing anything else.
+///
+/// A short buffer here would be read past by the C, and a long one would silently
+/// ignore the tail — the class of defect that publishes a truncated address.
+fn arg32(map: &Map, key: Qstr) -> Result<[u8; 32], crate::error::Error> {
+    let obj = map.get(key)?;
+    // SAFETY: the buffer is borrowed for the duration of this call only.
+    let slice = unsafe { get_buffer(obj)? };
+    if slice.len() != 32 {
+        return Err(crate::error::value_error!(c"expected exactly 32 bytes"));
+    }
+    let mut out = [0u8; 32];
+    out.copy_from_slice(slice);
+    Ok(out)
+}
+
+/// Serialise a signature into the flat wire layout the host protocol expects:
+///   c ‖ K1 ‖ K2 ‖ r_g[0..n] ‖ r_x[0..n]
+fn signature_bytes(sig: &Signature) -> Result<Obj, crate::error::Error> {
+    let n = sig.ring_size;
+    let mut buf = [0u8; 32 * 3 + 32 * MAX_RING_SIZE * 2];
+    let mut o = 0;
+    buf[o..o + 32].copy_from_slice(&sig.c);
+    o += 32;
+    buf[o..o + 32].copy_from_slice(&sig.k1);
+    o += 32;
+    buf[o..o + 32].copy_from_slice(&sig.k2);
+    o += 32;
+    for i in 0..n {
+        buf[o..o + 32].copy_from_slice(&sig.r_g[i]);
+        o += 32;
+    }
+    for i in 0..n {
+        buf[o..o + 32].copy_from_slice(&sig.r_x[i]);
+        o += 32;
+    }
+    buf[..o].try_into()
+}
+
+/// Read the ring: an iterable of (stealth_address, amount_commitment, blinded_asset_id),
+/// each exactly 32 bytes, all premultiplication conventions as documented in clsag_ggx.h.
+fn read_ring(obj: Obj) -> Result<(heapless::Vec<RingMember, MAX_RING_SIZE>, usize), crate::error::Error> {
+    let mut ring: heapless::Vec<RingMember, MAX_RING_SIZE> = heapless::Vec::new();
+    for item in crate::micropython::iter::IterBuf::new().try_iterate(obj)? {
+        let (p, a, t): (Obj, Obj, Obj) = item.try_into()?;
+        // SAFETY: buffers borrowed only within this loop iteration.
+        let (pb, ab, tb) = unsafe { (get_buffer(p)?, get_buffer(a)?, get_buffer(t)?) };
+        if pb.len() != 32 || ab.len() != 32 || tb.len() != 32 {
+            return Err(crate::error::value_error!(c"ring entries must be 32 bytes"));
+        }
+        let mut m = RingMember {
+            stealth_address: [0u8; 32],
+            amount_commitment_div8: [0u8; 32],
+            blinded_asset_id_div8: [0u8; 32],
+        };
+        m.stealth_address.copy_from_slice(pb);
+        m.amount_commitment_div8.copy_from_slice(ab);
+        m.blinded_asset_id_div8.copy_from_slice(tb);
+        ring.push(m)
+            .map_err(|_| crate::error::value_error!(c"ring too large"))?;
+    }
+    let n = ring.len();
+    if n == 0 {
+        return Err(crate::error::value_error!(c"ring must not be empty"));
+    }
+    Ok((ring, n))
+}
+
+extern "C" fn py_generators_init() -> Obj {
+    let block = || {
+        zano::init()?;
+        Ok(Obj::const_none())
+    };
+    unsafe { util::try_or_raise(block) }
+}
+
+extern "C" fn py_sign(_n_args: usize, _args: *const Obj, kwargs: *mut Map) -> Obj {
+    let block = |_args: &[Obj], kwargs: &Map| {
+        let (ring, _n) = read_ring(kwargs.get(Qstr::MP_QSTR_ring)?)?;
+        let msg = arg32(kwargs, Qstr::MP_QSTR_message_hash)?;
+        let pc = arg32(kwargs, Qstr::MP_QSTR_pseudo_out_amount_commitment)?;
+        let pa = arg32(kwargs, Qstr::MP_QSTR_pseudo_out_asset_id)?;
+        let ki = arg32(kwargs, Qstr::MP_QSTR_key_image)?;
+        let index: usize = kwargs.get(Qstr::MP_QSTR_secret_index)?.try_into()?;
+
+        // Absorbed into zeroizing types immediately; the Python-side bytes are the
+        // caller's problem and cannot be reached from here.
+        let secrets = SpendSecrets {
+            spend: Scalar::from_bytes(&arg32(kwargs, Qstr::MP_QSTR_secret_spend)?),
+            amount_blind: Scalar::from_bytes(&arg32(kwargs, Qstr::MP_QSTR_secret_amount_blind)?),
+            asset: Scalar::from_bytes(&arg32(kwargs, Qstr::MP_QSTR_secret_asset)?),
+        };
+
+        let sig = zano::sign(&msg, &ring, &pc, &pa, &ki, secrets, index)?;
+        signature_bytes(&sig)
+    };
+    unsafe { util::try_with_args_and_kwargs(_n_args, _args, kwargs, block) }
+}
+
+#[no_mangle]
+#[rustfmt::skip]
+pub static mp_module_trezorzano: Module = obj_module! {
+    Qstr::MP_QSTR___name__ => Qstr::MP_QSTR_trezorzano.to_obj(),
+
+    /// mock:global
+
+    /// def generators_init() -> None:
+    ///     """
+    ///     Initialise the Zano generator constants. Idempotent. Must succeed before
+    ///     signing. Not thread-safe, which is irrelevant on device and matters only
+    ///     to host harnesses.
+    ///     """
+    Qstr::MP_QSTR_generators_init => obj_fn_0!(py_generators_init).as_obj(),
+
+    /// def sign(
+    ///     *,
+    ///     message_hash: bytes,
+    ///     ring: list[tuple[bytes, bytes, bytes]],
+    ///     pseudo_out_amount_commitment: bytes,
+    ///     pseudo_out_asset_id: bytes,
+    ///     key_image: bytes,
+    ///     secret_spend: bytes,
+    ///     secret_amount_blind: bytes,
+    ///     secret_asset: bytes,
+    ///     secret_index: int,
+    /// ) -> bytes:
+    ///     """
+    ///     Produce a CLSAG_GGX ring signature in one call.
+    ///
+    ///     Returns c ‖ K1 ‖ K2 ‖ r_g[0..n] ‖ r_x[0..n], all 32-byte little-endian.
+    ///
+    ///     Ring entries are (stealth_address, amount_commitment, blinded_asset_id).
+    ///     amount_commitment and blinded_asset_id are premultiplied by 1/8;
+    ///     stealth_address is not. pseudo_out_* are NOT premultiplied on this side —
+    ///     the asymmetry against verification is Zano's, not an oversight.
+    ///
+    ///     The three secrets are consumed and wiped before this returns. That is a
+    ///     guarantee about this layer only: whatever held them before the call is
+    ///     beyond its reach.
+    ///     """
+    Qstr::MP_QSTR_sign => obj_fn_kw!(0, py_sign).as_obj(),
+};

@@ -30,7 +30,7 @@ fn main() {
         "ed25519-donna/ed25519-keccak.c", "ed25519-donna/ed25519.c",
         "sha3.c", "hasher.c", "blake256.c", "blake2b.c", "groestl.c",
         "sha2.c", "ripemd160.c", "memzero.c", "consteq.c",
-        "monero/xmr.c", "monero/serialize.c", "rand.c",
+        "monero/xmr.c", "monero/serialize.c",
     ] {
         b.file(format!("{}/{}", CRYPTO, f));
     }
