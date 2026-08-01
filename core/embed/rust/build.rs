@@ -655,6 +655,8 @@ fn generate_crypto_bindings() {
         .allowlist_function("zano_generators_init")
         .allowlist_function("zano_generate_clsag_ggx")
         .allowlist_function("zano_verify_clsag_ggx")
+        .allowlist_function("zano_address_encode")
+        .allowlist_function("zano_address_decode")
         // donna primitives the zano wrapper needs to marshal wire form <-> internals
         .allowlist_type("bignum256modm")
         .allowlist_type("bignum256modm_element_t")

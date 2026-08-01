@@ -90,6 +90,40 @@ pub struct Signature {
     pub ring_size: usize,
 }
 
+/// Length of a classic Zano address, in characters. Always exactly this.
+pub const ADDRESS_STR_LEN: usize = 97;
+
+/// Encode a classic Zano public address from its two public keys.
+///
+/// Zano derives the view key from the spend key exactly as Monero does — the
+/// reference's `dependent_key()` is `cn_fast_hash` then `sc_reduce32`, which is
+/// Trezor's `generate_monero_keys` convention — so the existing Monero key
+/// derivation already produces the right key relationship for Zano. Only the
+/// address encoding differs, and only in the tag: Zano's 0xc5 prefix needs a
+/// two-byte varint that Monero's encoder refuses outright.
+pub fn address_from_keys(
+    spend_public_key: &[u8; 32],
+    view_public_key: &[u8; 32],
+) -> Result<([u8; ADDRESS_STR_LEN], usize), Error> {
+    let mut buf = [0u8; ADDRESS_STR_LEN + 1];
+    // SAFETY: ffi; both inputs are fixed 32-byte arrays and `buf` has room for the
+    // 97 characters plus the NUL the C writes.
+    let ok = unsafe {
+        ffi::zano_address_encode(
+            spend_public_key.as_ptr(),
+            view_public_key.as_ptr(),
+            buf.as_mut_ptr() as *mut cty::c_char,
+            buf.len(),
+        )
+    };
+    if !ok {
+        return Err(Error::InvalidEncoding);
+    }
+    let mut out = [0u8; ADDRESS_STR_LEN];
+    out.copy_from_slice(&buf[..ADDRESS_STR_LEN]);
+    Ok((out, ADDRESS_STR_LEN))
+}
+
 /// Initialise the Zano generators. Idempotent; must succeed before signing.
 ///
 /// NOT thread-safe: the underlying C writes the `zano_point_X` global without a

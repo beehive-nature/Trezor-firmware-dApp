@@ -18,7 +18,7 @@
 
 use crate::micropython::{
     buffer::get_buffer,
-    macros::{obj_fn_0, obj_fn_kw, obj_module},
+    macros::{obj_fn_0, obj_fn_2, obj_fn_kw, obj_module},
     map::Map,
     module::Module,
     obj::Obj,
@@ -120,6 +120,26 @@ fn read_ring(
     Ok(ring)
 }
 
+extern "C" fn py_address_from_keys(spend: Obj, view: Obj) -> Obj {
+    let block = || {
+        // SAFETY: buffers borrowed only for the duration of this call.
+        let (sb, vb) = unsafe { (get_buffer(spend)?, get_buffer(view)?) };
+        if sb.len() != 32 || vb.len() != 32 {
+            return Err(crate::error::value_error!(c"keys must be 32 bytes"));
+        }
+        let mut s = [0u8; 32];
+        let mut v = [0u8; 32];
+        s.copy_from_slice(sb);
+        v.copy_from_slice(vb);
+        let (addr, n) = zano::address_from_keys(&s, &v)?;
+        // A Zano classic address is ASCII base58, so this is a str, not bytes.
+        let text = core::str::from_utf8(&addr[..n])
+            .map_err(|_| crate::error::value_error!(c"address is not valid ascii"))?;
+        text.try_into()
+    };
+    unsafe { util::try_or_raise(block) }
+}
+
 extern "C" fn py_generators_init() -> Obj {
     let block = || {
         zano::init()?;
@@ -169,6 +189,17 @@ pub static mp_module_trezorzano: Module = obj_module! {
     ///     to host harnesses.
     ///     """
     Qstr::MP_QSTR_generators_init => obj_fn_0!(py_generators_init).as_obj(),
+
+    /// def address_from_keys(spend_public_key: bytes, view_public_key: bytes) -> str:
+    ///     """
+    ///     Encode a classic Zano public address. Always exactly 97 characters,
+    ///     beginning "Zx".
+    ///
+    ///     Zano derives the view key from the spend key the same way Monero does
+    ///     (cn_fast_hash then sc_reduce32), so the existing Monero key derivation
+    ///     produces the right keys; only this encoding differs.
+    ///     """
+    Qstr::MP_QSTR_address_from_keys => obj_fn_2!(py_address_from_keys).as_obj(),
 
     /// def sign(
     ///     *,
