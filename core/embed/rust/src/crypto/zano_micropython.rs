@@ -67,33 +67,57 @@ fn signature_bytes(sig: &Signature) -> Result<Obj, crate::error::Error> {
     buf[..o].try_into()
 }
 
-/// Read the ring: an iterable of (stealth_address, amount_commitment, blinded_asset_id),
-/// each exactly 32 bytes, all premultiplication conventions as documented in clsag_ggx.h.
-fn read_ring(obj: Obj) -> Result<(heapless::Vec<RingMember, MAX_RING_SIZE>, usize), crate::error::Error> {
-    let mut ring: heapless::Vec<RingMember, MAX_RING_SIZE> = heapless::Vec::new();
+/// Collect a list of 32-byte buffers.
+///
+/// Three parallel lists rather than a list of triples: `(Obj, Obj, Obj)` has no
+/// `TryFrom<Obj>`, so nested destructuring does not compile, and flat `repeated bytes`
+/// is the shape protobuf will carry anyway. Length agreement between the three is
+/// checked by the caller, which is where a mismatch is actually meaningful.
+fn read_b32_list(
+    obj: Obj,
+) -> Result<heapless::Vec<[u8; 32], MAX_RING_SIZE>, crate::error::Error> {
+    let mut out: heapless::Vec<[u8; 32], MAX_RING_SIZE> = heapless::Vec::new();
     for item in crate::micropython::iter::IterBuf::new().try_iterate(obj)? {
-        let (p, a, t): (Obj, Obj, Obj) = item.try_into()?;
-        // SAFETY: buffers borrowed only within this loop iteration.
-        let (pb, ab, tb) = unsafe { (get_buffer(p)?, get_buffer(a)?, get_buffer(t)?) };
-        if pb.len() != 32 || ab.len() != 32 || tb.len() != 32 {
+        // SAFETY: the buffer is borrowed only within this iteration.
+        let b = unsafe { get_buffer(item)? };
+        if b.len() != 32 {
             return Err(crate::error::value_error!(c"ring entries must be 32 bytes"));
         }
-        let mut m = RingMember {
-            stealth_address: [0u8; 32],
-            amount_commitment_div8: [0u8; 32],
-            blinded_asset_id_div8: [0u8; 32],
-        };
-        m.stealth_address.copy_from_slice(pb);
-        m.amount_commitment_div8.copy_from_slice(ab);
-        m.blinded_asset_id_div8.copy_from_slice(tb);
-        ring.push(m)
+        let mut e = [0u8; 32];
+        e.copy_from_slice(b);
+        out.push(e)
             .map_err(|_| crate::error::value_error!(c"ring too large"))?;
     }
-    let n = ring.len();
-    if n == 0 {
+    Ok(out)
+}
+
+/// Read the ring from three parallel lists: stealth addresses, amount commitments,
+/// blinded asset ids. Premultiplication conventions are as documented in clsag_ggx.h —
+/// commitments and asset ids are 1/8, stealth addresses are not.
+fn read_ring(
+    p: Obj,
+    a: Obj,
+    t: Obj,
+) -> Result<heapless::Vec<RingMember, MAX_RING_SIZE>, crate::error::Error> {
+    let (ps, as_, ts) = (read_b32_list(p)?, read_b32_list(a)?, read_b32_list(t)?);
+    if ps.is_empty() {
         return Err(crate::error::value_error!(c"ring must not be empty"));
     }
-    Ok((ring, n))
+    if ps.len() != as_.len() || ps.len() != ts.len() {
+        return Err(crate::error::value_error!(
+            c"ring lists must be the same length"
+        ));
+    }
+    let mut ring: heapless::Vec<RingMember, MAX_RING_SIZE> = heapless::Vec::new();
+    for i in 0..ps.len() {
+        ring.push(RingMember {
+            stealth_address: ps[i],
+            amount_commitment_div8: as_[i],
+            blinded_asset_id_div8: ts[i],
+        })
+        .map_err(|_| crate::error::value_error!(c"ring too large"))?;
+    }
+    Ok(ring)
 }
 
 extern "C" fn py_generators_init() -> Obj {
@@ -106,7 +130,11 @@ extern "C" fn py_generators_init() -> Obj {
 
 extern "C" fn py_sign(_n_args: usize, _args: *const Obj, kwargs: *mut Map) -> Obj {
     let block = |_args: &[Obj], kwargs: &Map| {
-        let (ring, _n) = read_ring(kwargs.get(Qstr::MP_QSTR_ring)?)?;
+        let ring = read_ring(
+            kwargs.get(Qstr::MP_QSTR_ring_stealth_addresses)?,
+            kwargs.get(Qstr::MP_QSTR_ring_amount_commitments)?,
+            kwargs.get(Qstr::MP_QSTR_ring_blinded_asset_ids)?,
+        )?;
         let msg = arg32(kwargs, Qstr::MP_QSTR_message_hash)?;
         let pc = arg32(kwargs, Qstr::MP_QSTR_pseudo_out_amount_commitment)?;
         let pa = arg32(kwargs, Qstr::MP_QSTR_pseudo_out_asset_id)?;
@@ -145,7 +173,9 @@ pub static mp_module_trezorzano: Module = obj_module! {
     /// def sign(
     ///     *,
     ///     message_hash: bytes,
-    ///     ring: list[tuple[bytes, bytes, bytes]],
+    ///     ring_stealth_addresses: list[bytes],
+    ///     ring_amount_commitments: list[bytes],
+    ///     ring_blinded_asset_ids: list[bytes],
     ///     pseudo_out_amount_commitment: bytes,
     ///     pseudo_out_asset_id: bytes,
     ///     key_image: bytes,
@@ -159,9 +189,9 @@ pub static mp_module_trezorzano: Module = obj_module! {
     ///
     ///     Returns c ‖ K1 ‖ K2 ‖ r_g[0..n] ‖ r_x[0..n], all 32-byte little-endian.
     ///
-    ///     Ring entries are (stealth_address, amount_commitment, blinded_asset_id).
-    ///     amount_commitment and blinded_asset_id are premultiplied by 1/8;
-    ///     stealth_address is not. pseudo_out_* are NOT premultiplied on this side —
+    ///     The ring is three parallel lists of equal length. amount_commitments and
+    ///     blinded_asset_ids are premultiplied by 1/8; stealth_addresses are not.
+    ///     pseudo_out_* are NOT premultiplied on this side —
     ///     the asymmetry against verification is Zano's, not an oversight.
     ///
     ///     The three secrets are consumed and wiped before this returns. That is a

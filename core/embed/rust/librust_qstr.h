@@ -375,6 +375,7 @@ static void _librust_qstrs(void) {
   MP_QSTR_flow_get_address;
   MP_QSTR_flow_get_pubkey;
   MP_QSTR_footer;
+  MP_QSTR_generators_init;
   MP_QSTR_get;
   MP_QSTR_get_bonds;
   MP_QSTR_get_enabled;
@@ -458,6 +459,7 @@ static void _librust_qstrs(void) {
   MP_QSTR_joint__title;
   MP_QSTR_joint__to_the_total_amount;
   MP_QSTR_joint__you_are_contributing;
+  MP_QSTR_key_image;
   MP_QSTR_label;
   MP_QSTR_language;
   MP_QSTR_language__change_to_template;
@@ -485,6 +487,7 @@ static void _librust_qstrs(void) {
   MP_QSTR_max_ms;
   MP_QSTR_max_rounds;
   MP_QSTR_menu_title;
+  MP_QSTR_message_hash;
   MP_QSTR_message_in;
   MP_QSTR_message_out;
   MP_QSTR_message_retransmit;
@@ -619,6 +622,8 @@ static void _librust_qstrs(void) {
   MP_QSTR_prompt_empty;
   MP_QSTR_prompt_screen;
   MP_QSTR_prompt_title;
+  MP_QSTR_pseudo_out_amount_commitment;
+  MP_QSTR_pseudo_out_asset_id;
   MP_QSTR_pubkey;
   MP_QSTR_pubkey_qr;
   MP_QSTR_qr_title;
@@ -777,6 +782,9 @@ static void _librust_qstrs(void) {
   MP_QSTR_reset__your_backup_is_done;
   MP_QSTR_return_value;
   MP_QSTR_reverse;
+  MP_QSTR_ring_amount_commitments;
+  MP_QSTR_ring_blinded_asset_ids;
+  MP_QSTR_ring_stealth_addresses;
   MP_QSTR_rotation__change_template;
   MP_QSTR_rotation__east;
   MP_QSTR_rotation__north;
@@ -810,6 +818,10 @@ static void _librust_qstrs(void) {
   MP_QSTR_sd_card__use_different_card;
   MP_QSTR_sd_card__wanna_format;
   MP_QSTR_sd_card__wrong_sd_card;
+  MP_QSTR_secret_amount_blind;
+  MP_QSTR_secret_asset;
+  MP_QSTR_secret_index;
+  MP_QSTR_secret_spend;
   MP_QSTR_select_menu;
   MP_QSTR_select_word;
   MP_QSTR_select_word_count;
@@ -926,6 +938,7 @@ static void _librust_qstrs(void) {
   MP_QSTR_trezorproto;
   MP_QSTR_trezorthp;
   MP_QSTR_trezorui_api;
+  MP_QSTR_trezorzano;
   MP_QSTR_tutorial;
   MP_QSTR_tutorial__continue;
   MP_QSTR_tutorial__did_you_know;

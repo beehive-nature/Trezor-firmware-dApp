@@ -1,0 +1,48 @@
+syntax = "proto2";
+package hw.trezor.messages.zano;
+
+// Sugar for easier handling in Java
+option java_outer_classname = "TrezorMessageZano";
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+
+/**
+ * SCOPE OF THIS FILE
+ *
+ * Address messages only. Signing is deliberately absent, and the reason is worth
+ * recording rather than discovering later.
+ *
+ * A CLSAG_GGX signature consumes three secrets: the spend secret x_p, the
+ * amount-commitment blinding delta f, and the asset secret t. Only x_p is a pure
+ * seed derivation. f and t are transaction-dependent — they fall out of the shared
+ * secrets negotiated with each output's recipient during transaction construction.
+ * A signing protocol therefore cannot just hand the device a path and a ring; it has
+ * to carry enough of the transaction for the device to re-derive those blinding
+ * factors itself and check they match the commitments it is being asked to sign over.
+ * That is Zano transaction construction, not ring-signature marshalling, and it is
+ * not yet understood well enough here to specify.
+ *
+ * The invariant that must survive whatever those messages become: NO FIELD IN THIS
+ * FILE EVER CARRIES A SECRET. The host sends a derivation path and public data; the
+ * device derives. A wire format that accepts a spend key from the host has already
+ * lost, no matter how carefully the rest of the stack handles it.
+ */
+
+/**
+ * Request: Ask device for a Zano address derived from the seed
+ * @start
+ * @next ZanoAddress
+ * @next Failure
+ */
+message ZanoGetAddress {
+    repeated uint32 address_n = 1;   // BIP-32 path. SLIP-44 coin type 1018.
+    optional bool show_display = 2;  // Show on the device screen before returning
+    optional bool chunkify = 3;      // Display in chunks of 4 characters
+}
+
+/**
+ * Response: Contains a Zano address derived from the device seed
+ * @end
+ */
+message ZanoAddress {
+    required string address = 1;     // 97 characters for a standard mainnet address
+}
