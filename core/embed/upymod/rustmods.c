@@ -40,7 +40,13 @@ MP_REGISTER_MODULE(MP_QSTR_trezorble, mp_module_trezorble);
 MP_REGISTER_MODULE(MP_QSTR_trezorthp, mp_module_trezorthp);
 #endif
 
-#ifdef USE_MONERO
+// #if, not #ifdef. SConscript.firmware emits USE_MONERO as '1' or '0' rather than
+// defining/omitting it, so #ifdef is satisfied by both and this registration fired in
+// every build — including bitcoin-only, where the Rust symbol is not compiled. The
+// QSTR collector greps ^MP_REGISTER_MODULE and emits a table entry taking the symbol's
+// address, so that was a hard link dependency on something that did not exist.
+// crypto/monero/monero.h:8 and crypto/options.h:91 use #if for the same reason.
+#if USE_MONERO
 MP_REGISTER_MODULE(MP_QSTR_trezorzano, mp_module_trezorzano);
 #endif
 

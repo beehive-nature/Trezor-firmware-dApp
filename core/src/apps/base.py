@@ -140,7 +140,25 @@ def get_features() -> Features:
             Capability.Translations,
         ]
 
-        # We don't support some currencies on later models (see #2793)
+        # Upstream drops NEM and EOS on models after T2T1 (#2793) — a product
+        # decision, not a technical one. On HARDWARE the EOS app is still compiled
+        # under EVERYTHING (SConscript.firmware:803-805, plus USE_EOS at :141 and
+        # the same flag in SConscript.kernel and SConscript.secmon) and still routed
+        # (workflow_handlers.py:233-236). Only the capability announcement was
+        # withheld, and a host will not offer what the device says it cannot do.
+        #
+        # Vaulta IS EOS. This fork exists to sign for it, so T3W1 announces it.
+        # NEM stays behind the upstream gate: its app is not built for T3W1, and
+        # announcing a capability whose handler is absent turns an honest refusal at
+        # connect time into a failure at signing time.
+        #
+        # Announcing this buys nothing in Trezor Suite — 26.7.3 removed EOS from
+        # connect entirely, so no account will appear there. It matters for
+        # trezorlib, which still speaks EosGetPublicKey/EosSignTx.
+        #
+        # NOT SUFFICIENT ON ITS OWN: all 39 eos__* UI strings are empty for the
+        # Eckhart layout that T3W1 uses, so signing screens render untitled and
+        # unlabelled. See docs/bnr-build-inventory.md §3.2.
         if utils.INTERNAL_MODEL == "T2T1":
             f.capabilities.extend(
                 [
@@ -148,6 +166,8 @@ def get_features() -> Features:
                     Capability.EOS,
                 ]
             )
+        elif utils.INTERNAL_MODEL == "T3W1":
+            f.capabilities.append(Capability.EOS)
 
     if utils.USE_HAPTIC:
         f.haptic_feedback = storage_device.get_haptic_feedback()

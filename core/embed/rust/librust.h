@@ -13,9 +13,10 @@ extern mp_obj_module_t mp_module_trezortranslate;
 extern mp_obj_module_t mp_module_trezorble;
 extern mp_obj_module_t mp_module_trezorthp;
 
-#ifdef USE_MONERO
-// Zano CLSAG_GGX. Gated on USE_MONERO because zano_hp() calls xmr_hash_to_ec, so the
-// monero crypto sources are a hard prerequisite, not a coincidence of packaging.
+// #if, not #ifdef — USE_MONERO is emitted as '1' or '0', never omitted.
+// Gated on it because zano_hp() calls xmr_hash_to_ec, so the monero crypto sources
+// are a hard prerequisite, not a coincidence of packaging.
+#if USE_MONERO
 extern mp_obj_module_t mp_module_trezorzano;
 #endif
 
