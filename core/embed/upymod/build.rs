@@ -1203,6 +1203,13 @@ impl<'a> MpyBuilder<'a> {
             files.add(src, "trezor/enums/DebugMonero*.py")?;
             files.add(src, "trezor/enums/Monero*.py")?;
 
+            // zano — after monero, which apps/zano/get_address.py imports for the
+            // shared key derivation. workflow_handlers routes ZanoGetAddress
+            // unconditionally and find_registered_handler catches only ValueError,
+            // so a missing frozen module raises an uncaught ImportError.
+            files.add(src, "apps/zano/*.py")?;
+            files.add(src, "trezor/enums/Zano*.py")?;
+
             if cfg!(feature = "nem") {
                 files.add(src, "apps/nem/*.py")?;
                 files.add(src, "apps/nem/*/*.py")?;

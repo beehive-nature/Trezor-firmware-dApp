@@ -182,6 +182,10 @@ fn add_crypto(lib: &mut xbuild::CLibrary) -> Result<()> {
                 "monero/base58.c",
                 "monero/serialize.c",
                 "monero/xmr.c",
+                // Zano, after monero: zano_hp() calls xmr_hash_to_ec.
+                "zano/clsag_ggx.c",
+                "zano/zano_address.c",
+                "zano/zano_generators.c",
             ],
             Some(crypto_attrs.clone()),
         );

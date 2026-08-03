@@ -97,7 +97,11 @@ test = [
     "ui_empty_lock",
     "universal_fw",
 ]
-universal_fw = []
+# zano rides with universal_fw deliberately. rtl/build.rs gates crypto/zano/*.c on
+# cfg!(feature = "universal_fw"), so tying the Rust to the same flag makes it
+# impossible for one to be built without the other — which is the failure this
+# already caused once, as an undefined mp_module_trezorzano at final link.
+universal_fw = ["zano"]
 with_new_crates = ["dep:io", "dep:xbuild"]
 with_upymod = ["dep:upymod"]
 
