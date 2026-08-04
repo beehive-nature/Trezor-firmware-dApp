@@ -566,235 +566,235 @@
       "Bolt": "You are about to sign {0}.",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "You are about to sign {0}."
     },
     "eos__action_name": {
       "Bolt": "Action Name",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Action Name"
     },
     "eos__arbitrary_data": {
       "Bolt": "Arbitrary data",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Arbitrary data"
     },
     "eos__buy_ram": {
       "Bolt": "Buy RAM",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Buy RAM"
     },
     "eos__bytes": {
       "Bolt": "Bytes",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Bytes"
     },
     "eos__cancel_vote": {
       "Bolt": "Cancel vote",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Cancel vote"
     },
     "eos__checksum": {
       "Bolt": "Checksum",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Checksum"
     },
     "eos__code": {
       "Bolt": "Code",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Code"
     },
     "eos__contract": {
       "Bolt": "Contract",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Contract"
     },
     "eos__cpu": {
       "Bolt": "CPU",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "CPU"
     },
     "eos__creator": {
       "Bolt": "Creator",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Creator"
     },
     "eos__delegate": {
       "Bolt": "Delegate",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Delegate"
     },
     "eos__delete_auth": {
       "Bolt": "Delete Auth",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Delete Auth"
     },
     "eos__from": {
       "Bolt": "From",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "From"
     },
     "eos__link_auth": {
       "Bolt": "Link Auth",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Link Auth"
     },
     "eos__memo": {
       "Bolt": "Memo",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Memo"
     },
     "eos__name": {
       "Bolt": "Name",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Name"
     },
     "eos__net": {
       "Bolt": "NET",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "NET"
     },
     "eos__new_account": {
       "Bolt": "New account",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "New account"
     },
     "eos__owner": {
       "Bolt": "Owner",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Owner"
     },
     "eos__parent": {
       "Bolt": "Parent",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Parent"
     },
     "eos__payer": {
       "Bolt": "Payer",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Payer"
     },
     "eos__permission": {
       "Bolt": "Permission",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Permission"
     },
     "eos__proxy": {
       "Bolt": "Proxy",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Proxy"
     },
     "eos__receiver": {
       "Bolt": "Receiver",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Receiver"
     },
     "eos__refund": {
       "Bolt": "Refund",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Refund"
     },
     "eos__requirement": {
       "Bolt": "Requirement",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Requirement"
     },
     "eos__sell_ram": {
       "Bolt": "Sell RAM",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Sell RAM"
     },
     "eos__sender": {
       "Bolt": "Sender",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Sender"
     },
     "eos__threshold": {
       "Bolt": "Threshold",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Threshold"
     },
     "eos__to": {
       "Bolt": "To",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "To"
     },
     "eos__transfer": {
       "Bolt": "Transfer",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Transfer"
     },
     "eos__type": {
       "Bolt": "Type",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Type"
     },
     "eos__undelegate": {
       "Bolt": "Undelegate",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Undelegate"
     },
     "eos__unlink_auth": {
       "Bolt": "Unlink Auth",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Unlink Auth"
     },
     "eos__update_auth": {
       "Bolt": "Update Auth",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Update Auth"
     },
     "eos__vote_for_producers": {
       "Bolt": "Vote for producers",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Vote for producers"
     },
     "eos__vote_for_proxy": {
       "Bolt": "Vote for proxy",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Vote for proxy"
     },
     "eos__voter": {
       "Bolt": "Voter",
       "Caesar": "",
       "Delizia": "",
-      "Eckhart": ""
+      "Eckhart": "Voter"
     },
     "ethereum__all_evms": "All EVMs",
     "ethereum__approve": "Approve",
