@@ -37,6 +37,11 @@ if [ "$fail" -eq 0 ]; then
     echo "#   sh /mnt/c/Users/travi/zano-port/build_clsag_crosscheck.sh    # CLSAG    8/8"
     echo "#   sh /mnt/c/Users/travi/zano-port/build_address_crosscheck.sh  # address 12/12"
     echo "#"
+    echo "# Not yet ported, reference-side only — the BGE one-out-of-many proof"
+    echo "# the asset surjection needs. This probe answers whether it works at"
+    echo "# ring size 1, which is the whole shape of a one-input native MVP:"
+    echo "#   sh /mnt/c/Users/travi/zano-port/build_bge_probe.sh          # BGE     8/8"
+    echo "#"
     echo "# CLSAG_GGX is the spend path. Run both before trusting a signature"
     echo "# this code produces on a network where the funds are real."
 else
