@@ -1,16 +1,21 @@
 # bpq emulator receipts
 
-Produced at `db92c2566da8353e1f179c77f2bf3bd7ea32c5b8` (clean tree), 2026-10-05T03:03:27Z, in WSL with `nix-shell`.
-Pasted unedited; ANSI colour codes and per-line emulator log lines (DBG/INF/WRN) were
-filtered from the unit-test output, and Rust compiler warnings from the cross-check's
-stderr. The full cross-check output is `emu_xcheck_receipt.json` beside this file.
-Public BIP-39 test vector only (abandon x11, about). EMULATOR ONLY: no device, no flash.
+Produced at `1d21da9e4547836b63c0bd8798e50b7d1bf16c27` (clean tree), 2026-10-05, in WSL with `nix-shell`:
+`bpq-safe7` rebased onto `beehive` `7a8709bdff`, in a fresh clone with every submodule
+fetched. Oracles: beehive-nature `42aac5cfa`. Pasted unedited; ANSI colour codes and
+per-line emulator log lines (DBG/INF/WRN) were filtered from the unit-test output, and Rust
+compiler warnings from the cross-check's stderr. The full cross-check output is
+`emu_xcheck_receipt.json` beside this file. Public BIP-39 test vector only (abandon x11,
+about). EMULATOR ONLY: no device, no flash.
+
+The device id (`bzpq1lws2…47lvv`) and the wallet id are the ones the 2026-10-04 receipts
+at `db92c2566` recorded: the rebase changed no byte the device derives.
 
 ## 0-tree
 
 ```
 $ git rev-parse HEAD; git status --porcelain --untracked-files=all
-db92c2566da8353e1f179c77f2bf3bd7ea32c5b8
+1d21da9e4547836b63c0bd8798e50b7d1bf16c27
 (empty = clean)
 ```
 
@@ -20,10 +25,17 @@ db92c2566da8353e1f179c77f2bf3bd7ea32c5b8
 $ (cd core && uv run --frozen xtask build firmware --emulator --model T3W1 --pyopt false --debug-link true --disable-tropic)  [in nix-shell]
    = note: `#[warn(unused_features)]` (part of `#[warn(unused)]`) on by default
 
-warning: `trezor_lib` (lib) generated 1 warning
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 47.26s
+warning: `trezor_lib` (lib) generated 3 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 33.84s
 rc=0
-05b6912c3c8d85519ba5945b8cd4678df95297e18768e35a184758f3200c137d  core/build-xtask/artifacts/T3W1/firmware-emu
+5c1f7332ea540140c521bd886d3a75a8e9aa0876e94ec90e1a8dedd9193638a3  core/build-xtask/artifacts/T3W1/firmware-emu
+```
+
+## 1b-tree after the build
+
+```
+$ git status --porcelain --untracked-files=all  (after build)
+(empty = clean)
 ```
 
 ## 2-host-test
@@ -81,6 +93,7 @@ Summary:
 -------------------
 OK: test_trezor.crypto.bpq.py
 PASSED: 1/1 tests OK!
+rc=0
 ```
 
 ## 4-xcheck
