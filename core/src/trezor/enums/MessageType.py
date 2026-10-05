@@ -303,3 +303,7 @@ if not utils.BITCOIN_ONLY:
     TronWithdrawUnfreeze = 2209
     TronVoteWitnessContract = 2210
     TronWithdrawBalance = 2213
+    BpqGetCard = 1300
+    BpqCard = 1301
+    BpqSign = 1302
+    BpqSignature = 1303

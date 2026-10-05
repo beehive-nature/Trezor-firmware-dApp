@@ -43,6 +43,9 @@ static void wrapped_ui_wait_callback(uint32_t current, uint32_t total) {
 #endif
 #include "modtrezorcrypto-bip39.h"
 #include "modtrezorcrypto-blake256.h"
+#ifdef USE_BPQ
+#include "modtrezorcrypto-bpq.h"
+#endif
 #include "modtrezorcrypto-blake2b.h"
 #include "modtrezorcrypto-blake2s.h"
 #include "modtrezorcrypto-chacha20poly1305.h"
@@ -101,6 +104,9 @@ STATIC const mp_rom_map_elem_t mp_module_trezorcrypto_globals_table[] = {
      MP_ROM_PTR(&mod_trezorcrypto_Blake256_type)},
     {MP_ROM_QSTR(MP_QSTR_blake2b), MP_ROM_PTR(&mod_trezorcrypto_Blake2b_type)},
     {MP_ROM_QSTR(MP_QSTR_blake2s), MP_ROM_PTR(&mod_trezorcrypto_Blake2s_type)},
+#ifdef USE_BPQ
+    {MP_ROM_QSTR(MP_QSTR_bpq), MP_ROM_PTR(&mod_trezorcrypto_bpq_module)},
+#endif
 #if !BITCOIN_ONLY
     {MP_ROM_QSTR(MP_QSTR_cardano),
      MP_ROM_PTR(&mod_trezorcrypto_cardano_module)},

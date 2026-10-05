@@ -170,6 +170,14 @@ def _find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.EthereumSignTypedData:
             return "apps.ethereum.sign_typed_data"
 
+        # bpq: built into the emulator only (SConscript.unix); a hardware image
+        # has neither the app nor trezorcrypto.bpq, so it answers as for any
+        # unknown message.
+        if utils.EMULATOR and msg_type == MessageType.BpqGetCard:
+            return "apps.bpq.get_card"
+        if utils.EMULATOR and msg_type == MessageType.BpqSign:
+            return "apps.bpq.sign"
+
         # monero
         if msg_type == MessageType.MoneroGetAddress:
             return "apps.monero.get_address"

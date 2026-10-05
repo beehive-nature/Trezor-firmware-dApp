@@ -1188,6 +1188,11 @@ impl<'a> MpyBuilder<'a> {
             files.add(src, "apps/cardano/*/*.py")?;
             files.add(src, "trezor/enums/Cardano*.py")?;
 
+            // bpq: emulator only, with the C in rtl/build.rs (docs/bpq-device.md)
+            if cfg!(feature = "emulator") {
+                files.add(src, "apps/bpq/*.py")?;
+            }
+
             if cfg!(feature = "eos") {
                 files.add(src, "apps/eos/*.py")?;
                 files.add(src, "apps/eos/*/*.py")?;

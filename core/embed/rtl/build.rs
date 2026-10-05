@@ -310,6 +310,25 @@ fn add_crypto(lib: &mut xbuild::CLibrary) -> Result<()> {
         );
     }
 
+    // bpq: the device's own post-quantum identity (docs/bpq-device.md). Built
+    // into the universal emulator only; the hardware image is a separate,
+    // reviewed step, so a device build has neither this C nor the app above it.
+    if cfg!(feature = "universal_fw") && cfg!(feature = "emulator") {
+        lib.add_include("../../vendor/mldsa-native/mldsa");
+        lib.add_include("../../vendor/mlkem-native/mlkem");
+        lib.add_define("USE_BPQ", None);
+        lib.add_sources_in_dir_with_attrs(
+            crypto_path,
+            [
+                "bpq/bpq.c",
+                "bpq/bpq_mldsa65.c",
+                "bpq/bpq_mlkem768.c",
+                "bpq/bpq_slh.c",
+            ],
+            Some(crypto_attrs.clone()),
+        );
+    }
+
     Ok(())
 }
 

@@ -405,4 +405,11 @@ enum MessageType {
     // Telemetry
     MessageType_TelemetryGet = 1100 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_Telemetry = 1101 [(bitcoin_only) = true, (wire_out) = true];
+
+    // bpq: the device's own post-quantum identity (messages-bpq.proto). The
+    // 1300 block sits clear of the altcoin ranges and of 1200 (Zano lane).
+    MessageType_BpqGetCard = 1300 [(wire_in) = true];
+    MessageType_BpqCard = 1301 [(wire_out) = true];
+    MessageType_BpqSign = 1302 [(wire_in) = true];
+    MessageType_BpqSignature = 1303 [(wire_out) = true];
 }

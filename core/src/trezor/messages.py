@@ -1098,6 +1098,128 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["BleUnpair"]:
             return isinstance(msg, cls)
 
+    class BpqGetCard(protobuf.MessageType):
+        context: "str"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            context: "str",
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["BpqGetCard"]:
+            return isinstance(msg, cls)
+
+    class BpqCard(protobuf.MessageType):
+        id: "str"
+        dsa_public_key: "AnyBytes"
+        kem_public_key: "AnyBytes"
+        succession_commit: "AnyBytes"
+        signature: "AnyBytes"
+
+        def __init__(
+            self,
+            *,
+            id: "str",
+            dsa_public_key: "AnyBytes",
+            kem_public_key: "AnyBytes",
+            succession_commit: "AnyBytes",
+            signature: "AnyBytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["BpqCard"]:
+            return isinstance(msg, cls)
+
+    class BpqClaim(protobuf.MessageType):
+        kind: "str"
+        value: "str"
+
+        def __init__(
+            self,
+            *,
+            kind: "str",
+            value: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["BpqClaim"]:
+            return isinstance(msg, cls)
+
+    class BpqBinding(protobuf.MessageType):
+        at: "str"
+        claims: "list[BpqClaim]"
+
+        def __init__(
+            self,
+            *,
+            at: "str",
+            claims: "list[BpqClaim] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["BpqBinding"]:
+            return isinstance(msg, cls)
+
+    class BpqDetached(protobuf.MessageType):
+        at: "str"
+        size: "int"
+        sha3: "AnyBytes"
+
+        def __init__(
+            self,
+            *,
+            at: "str",
+            size: "int",
+            sha3: "AnyBytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["BpqDetached"]:
+            return isinstance(msg, cls)
+
+    class BpqSign(protobuf.MessageType):
+        context: "str"
+        binding: "BpqBinding | None"
+        detached: "BpqDetached | None"
+
+        def __init__(
+            self,
+            *,
+            context: "str",
+            binding: "BpqBinding | None" = None,
+            detached: "BpqDetached | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["BpqSign"]:
+            return isinstance(msg, cls)
+
+    class BpqSignature(protobuf.MessageType):
+        id: "str"
+        signature: "AnyBytes"
+
+        def __init__(
+            self,
+            *,
+            id: "str",
+            signature: "AnyBytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["BpqSignature"]:
+            return isinstance(msg, cls)
+
     class CardanoBlockchainPointerType(protobuf.MessageType):
         block_index: "int"
         tx_index: "int"
