@@ -305,3 +305,7 @@ if not utils.BITCOIN_ONLY:
     TronWithdrawBalance = 2213
     ZanoGetAddress = 1200
     ZanoAddress = 1201
+    BpqGetCard = 1300
+    BpqCard = 1301
+    BpqSign = 1302
+    BpqSignature = 1303

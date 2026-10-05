@@ -763,3 +763,7 @@ if TYPE_CHECKING:
         BenchmarkResult = 9103
         TelemetryGet = 1100
         Telemetry = 1101
+        BpqGetCard = 1300
+        BpqCard = 1301
+        BpqSign = 1302
+        BpqSignature = 1303

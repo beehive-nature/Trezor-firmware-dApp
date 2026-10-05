@@ -827,6 +827,10 @@ class MessageType(IntEnum):
     BenchmarkResult = 9103
     TelemetryGet = 1100
     Telemetry = 1101
+    BpqGetCard = 1300
+    BpqCard = 1301
+    BpqSign = 1302
+    BpqSignature = 1303
 
 
 class BenchmarkListNames(protobuf.MessageType):
@@ -2224,6 +2228,140 @@ class ProdTestT1(protobuf.MessageType):
         payload: Optional["bytes"] = None,
     ) -> None:
         self.payload = payload
+
+
+class BpqGetCard(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 1300
+    FIELDS = {
+        1: protobuf.Field("context", "string", repeated=False, required=True),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        context: "str",
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.context = context
+        self.show_display = show_display
+
+
+class BpqCard(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 1301
+    FIELDS = {
+        1: protobuf.Field("id", "string", repeated=False, required=True),
+        2: protobuf.Field("dsa_public_key", "bytes", repeated=False, required=True),
+        3: protobuf.Field("kem_public_key", "bytes", repeated=False, required=True),
+        4: protobuf.Field("succession_commit", "bytes", repeated=False, required=True),
+        5: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        id: "str",
+        dsa_public_key: "bytes",
+        kem_public_key: "bytes",
+        succession_commit: "bytes",
+        signature: "bytes",
+    ) -> None:
+        self.id = id
+        self.dsa_public_key = dsa_public_key
+        self.kem_public_key = kem_public_key
+        self.succession_commit = succession_commit
+        self.signature = signature
+
+
+class BpqClaim(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("kind", "string", repeated=False, required=True),
+        2: protobuf.Field("value", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        kind: "str",
+        value: "str",
+    ) -> None:
+        self.kind = kind
+        self.value = value
+
+
+class BpqBinding(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("at", "string", repeated=False, required=True),
+        2: protobuf.Field("claims", "BpqClaim", repeated=True, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        at: "str",
+        claims: Optional[Sequence["BpqClaim"]] = None,
+    ) -> None:
+        self.claims: Sequence["BpqClaim"] = claims if claims is not None else []
+        self.at = at
+
+
+class BpqDetached(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("at", "string", repeated=False, required=True),
+        2: protobuf.Field("size", "uint64", repeated=False, required=True),
+        3: protobuf.Field("sha3", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        at: "str",
+        size: "int",
+        sha3: "bytes",
+    ) -> None:
+        self.at = at
+        self.size = size
+        self.sha3 = sha3
+
+
+class BpqSign(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 1302
+    FIELDS = {
+        1: protobuf.Field("context", "string", repeated=False, required=True),
+        2: protobuf.Field("binding", "BpqBinding", repeated=False, required=False, default=None),
+        3: protobuf.Field("detached", "BpqDetached", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        context: "str",
+        binding: Optional["BpqBinding"] = None,
+        detached: Optional["BpqDetached"] = None,
+    ) -> None:
+        self.context = context
+        self.binding = binding
+        self.detached = detached
+
+
+class BpqSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 1303
+    FIELDS = {
+        1: protobuf.Field("id", "string", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        id: "str",
+        signature: "bytes",
+    ) -> None:
+        self.id = id
+        self.signature = signature
 
 
 class CardanoBlockchainPointerType(protobuf.MessageType):

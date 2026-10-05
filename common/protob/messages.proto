@@ -412,4 +412,11 @@ enum MessageType {
     // transaction-construction problem rather than a ring-signature one.
     MessageType_ZanoGetAddress = 1200 [(wire_in) = true];
     MessageType_ZanoAddress = 1201 [(wire_out) = true];
+
+    // bpq: the device's own post-quantum identity (messages-bpq.proto). The
+    // 1300 block sits clear of the altcoin ranges and of 1200 (Zano lane).
+    MessageType_BpqGetCard = 1300 [(wire_in) = true];
+    MessageType_BpqCard = 1301 [(wire_out) = true];
+    MessageType_BpqSign = 1302 [(wire_in) = true];
+    MessageType_BpqSignature = 1303 [(wire_out) = true];
 }

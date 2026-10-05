@@ -1,0 +1,84 @@
+syntax = "proto2";
+package hw.trezor.messages.bpq;
+
+// Sugar for easier handling in Java
+option java_outer_classname = "TrezorMessageBpq";
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+
+/**
+ * The device's own post-quantum identity: beehive-nature SPEC-BPQ-1 keys under
+ * a SLIP-21 child of the device seed (docs/bpq-device.md, ruling R4).
+ *
+ * NO FIELD IN THIS FILE CARRIES A SECRET, in either direction. The host names a
+ * context and, for a signature, the fields of the statement; the device derives,
+ * builds the signed bytes itself, shows them, and returns public data.
+ */
+
+/**
+ * Request: the SPEC-BPQ-1 §3 card for a context
+ * @start
+ * @next BpqCard
+ * @next Failure
+ */
+message BpqGetCard {
+    required string context = 1;        // 1-64 bytes, printable ASCII, never "root"
+    optional bool show_display = 2;     // show the id before answering
+}
+
+/**
+ * Response: the card; the host writes it as {bpq:1, id, dsa, kem, succ, sig}
+ * @end
+ */
+message BpqCard {
+    required string id = 1;              // bzpq1...
+    required bytes dsa_public_key = 2;   // ML-DSA-65, 1952 bytes
+    required bytes kem_public_key = 3;   // X-Wing, 1216 bytes
+    required bytes succession_commit = 4; // 32 bytes
+    required bytes signature = 5;        // ML-DSA-65 over "bpq1/card" || dsa || kem || succ
+}
+
+/**
+ * One claim of a binding: kind=value
+ */
+message BpqClaim {
+    required string kind = 1;            // ^[a-z0-9][a-z0-9._-]{0,31}$, unique
+    required string value = 2;           // one non-empty line
+}
+
+/**
+ * SPEC-BPQ-1 §3 binding statement
+ */
+message BpqBinding {
+    required string at = 1;              // YYYY-MM-DDTHH:MM:SS[.f]Z
+    repeated BpqClaim claims = 2;        // 1-16
+}
+
+/**
+ * SPEC-BPQ-1 §3b detached file signature statement
+ */
+message BpqDetached {
+    required string at = 1;              // YYYY-MM-DDTHH:MM:SS[.f]Z
+    required uint64 size = 2;            // file size in bytes
+    required bytes sha3 = 3;             // SHA3-256 of the file, 32 bytes
+}
+
+/**
+ * Request: sign exactly one statement, after the user confirms it on the device
+ * @start
+ * @next BpqSignature
+ * @next Failure
+ */
+message BpqSign {
+    required string context = 1;
+    optional BpqBinding binding = 2;
+    optional BpqDetached detached = 3;
+}
+
+/**
+ * Response: the signer's id and the ML-DSA-65 signature
+ * @end
+ */
+message BpqSignature {
+    required string id = 1;
+    required bytes signature = 2;        // 3309 bytes
+}
