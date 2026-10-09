@@ -54,11 +54,19 @@ checks.wallet_binding_names_device = walletBinding.claims['bsafe-pq'] === input.
 checks.device_binding_names_wallet = input.binding.claims['bzpq-wallet'] === walletBinding.id;
 checks.verifyBind_wallet = B.verifyBind(walletBinding);
 
+// Three summaries beside the flat checks, so key equality, signature
+// verification and the controls are read apart (the Rust oracle prints the same).
+const keys_equal = checks.dsa_equal && checks.kem_equal && checks.succ_equal && checks.id_equal;
+const signatures_verify = checks.verifyCard_device && checks.verifyBind_device
+  && checks.verifyFile_device && checks.verifyBind_wallet
+  && checks.wallet_binding_names_device && checks.device_binding_names_wallet;
+const controls_refused = checks.control_card_bitflip_refused
+  && checks.control_binding_claim_changed_refused && checks.control_file_changed_refused;
 const ok = Object.values(checks).every((v) => v === true);
 console.log(JSON.stringify({
   oracle: 'surfaces/bpq.js',
   bpq_js_sha256: sha256(join(BN, 'surfaces', 'bpq.js')),
   bpq_lib_sha256: sha256(join(BN, 'surfaces', 'onboarding', 'vendor', 'bpq-lib.js')),
-  checks, ok, wallet_binding: walletBinding,
+  checks, keys_equal, signatures_verify, controls_refused, ok, wallet_binding: walletBinding,
 }));
 process.exit(ok ? 0 : 1);

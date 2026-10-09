@@ -264,11 +264,26 @@ def main() -> int:
     env = dict(os.environ, BEEHIVE_NATURE=bn)
     js = oracle(["node", str(ROOT / "crypto/bpq/js-xcheck.mjs")], payload)
     payload["wallet_binding"] = js["wallet_binding"]
-    rust_dir = ROOT / "crypto/bpq/rust-xcheck"
+    # The Rust oracle lives in beehive-nature (crates/bpq-device-xcheck): bsigner's
+    # own bpq.rs compiled by #[path], built from the workspace lockfile at whatever
+    # revision BEEHIVE_NATURE has checked out; the receipt records that revision.
+    # Nothing of it is copied here.
     subprocess.run(
-        ["cargo", "build", "--quiet", "--release"], cwd=rust_dir, env=env, check=True
+        [
+            "cargo",
+            "build",
+            "--quiet",
+            "--release",
+            "--locked",
+            "-p",
+            "bpq-device-xcheck",
+        ],
+        cwd=bn,
+        env=env,
+        check=True,
     )
-    rust = oracle([str(rust_dir / "target/release/bpq-device-xcheck")], payload)
+    target_dir = Path(os.environ.get("CARGO_TARGET_DIR", str(Path(bn) / "target")))
+    rust = oracle([str(target_dir / "release/bpq-device-xcheck")], payload)
 
     same_card = runs[0]["card"]["id"] == runs[1]["card"]["id"] and all(
         runs[0]["card"][f] == runs[1]["card"][f] for f in ("dsa", "kem", "succ")
@@ -315,7 +330,16 @@ def main() -> int:
         },
         "js": {
             k: js[k]
-            for k in ("oracle", "bpq_js_sha256", "bpq_lib_sha256", "checks", "ok")
+            for k in (
+                "oracle",
+                "bpq_js_sha256",
+                "bpq_lib_sha256",
+                "checks",
+                "keys_equal",
+                "signatures_verify",
+                "controls_refused",
+                "ok",
+            )
         },
         "rust": rust,
         "device_binding": first["binding"],
