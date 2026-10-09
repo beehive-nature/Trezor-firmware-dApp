@@ -175,12 +175,13 @@ def _find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.ZanoGetAddress:
             return "apps.zano.get_address"
 
-        # bpq: built into the emulator only (SConscript.unix); a hardware image
-        # has neither the app nor trezorcrypto.bpq, so it answers as for any
-        # unknown message.
-        if utils.EMULATOR and msg_type == MessageType.BpqGetCard:
+        # bpq: a model-scoped feature (universal T3W1, hardware and emulator; the
+        # gate is `bpq` in rtl/build.rs and upymod/build.rs). A build without it
+        # freezes no bpq app, has no trezorcrypto.bpq, and USE_BPQ is False, so
+        # nothing is returned here and the message is answered as any unknown one.
+        if utils.USE_BPQ and msg_type == MessageType.BpqGetCard:
             return "apps.bpq.get_card"
-        if utils.EMULATOR and msg_type == MessageType.BpqSign:
+        if utils.USE_BPQ and msg_type == MessageType.BpqSign:
             return "apps.bpq.sign"
 
         # monero

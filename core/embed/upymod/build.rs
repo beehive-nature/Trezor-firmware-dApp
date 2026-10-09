@@ -51,6 +51,13 @@ fn main() -> Result<()> {
             lib.add_define("USE_THP", None);
         }
 
+        // bpq (docs/bpq-device.md): the same condition as the C in rtl/build.rs,
+        // which also exports USE_BPQ as a public define (add_define dedups); this
+        // one ties the Python constant to upymod's own feature.
+        if cfg!(feature = "universal_fw") && cfg!(feature = "bpq") {
+            lib.add_define("USE_BPQ", None);
+        }
+
         if cfg!(feature = "serial_number") {
             lib.add_define("USE_SERIAL_NUMBER", Some("1"));
         }
@@ -927,6 +934,7 @@ impl<'a> MpyBuilder<'a> {
 
         let backlight = py_bool(cfg!(feature = "backlight"));
         let ble = py_bool(cfg!(feature = "ble"));
+        let bpq = py_bool(cfg!(feature = "universal_fw") && cfg!(feature = "bpq"));
         let btc_only = py_bool(cfg!(not(feature = "universal_fw")));
         let button = py_bool(cfg!(feature = "button"));
         let emulator = py_bool(cfg!(feature = "emulator"));
@@ -953,6 +961,7 @@ impl<'a> MpyBuilder<'a> {
             format!(r"s/utils\.EMULATOR/{emulator}/g"),
             format!(r"s/utils\.USE_BACKLIGHT/{backlight}/g"),
             format!(r"s/utils\.USE_BLE/{ble}/g"),
+            format!(r"s/utils\.USE_BPQ/{bpq}/g"),
             format!(r"s/utils\.USE_BUTTON/{button}/g"),
             format!(r"s/utils\.USE_HAPTIC/{haptic}/g"),
             format!(r"s/utils\.USE_N4W1/{n4w1}/g"),
@@ -1188,8 +1197,10 @@ impl<'a> MpyBuilder<'a> {
             files.add(src, "apps/cardano/*/*.py")?;
             files.add(src, "trezor/enums/Cardano*.py")?;
 
-            // bpq: emulator only, with the C in rtl/build.rs (docs/bpq-device.md)
-            if cfg!(feature = "emulator") {
+            // bpq: model-scoped (universal T3W1, hardware and emulator); the C comes
+            // from rtl/build.rs and USE_BPQ from both build scripts, under the same
+            // condition (docs/bpq-device.md)
+            if cfg!(feature = "bpq") {
                 files.add(src, "apps/bpq/*.py")?;
             }
 

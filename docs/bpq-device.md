@@ -1,7 +1,9 @@
 # bpq on the device: the Safe 7's own post-quantum identity
 
-Status: EMULATOR ONLY. Built and tested on the T3W1 debug emulator. Nothing here has
-run on hardware, and nothing here authorizes flashing a device.
+Status: GATED TO T3W1 by the model-scoped cargo feature `bpq`: universal firmware for
+T3W1, hardware and emulator alike, from the commit that lands it (a btc-only build has
+none of it); tested on the T3W1 debug emulator. No hardware image has run on a device,
+and nothing here authorizes flashing a device.
 
 Ruling: beehive-nature `docs/RULINGS-2026-10-04.md` R4 (option A). The device's
 post-quantum identity is its own, derived from a versioned, domain-separated child of
@@ -94,7 +96,14 @@ with `bpq`, so none can collide with the tree's own ML-DSA-44 or SHA2-128s build
 - **Hardware.** ML-DSA-65 working memory goes to the MicroPython heap through
   mldsa-native's `MLD_CONFIG_CUSTOM_ALLOC_FREE`, wiped before it is freed. Whether
   that, plus the stack mldsa-native still uses, fits the T3W1 firmware (32 KiB app
-  stack) is UNVERIFIED. The hardware firmware build does not include this app.
+  stack) is UNVERIFIED as a whole: flash (+36,352 B), heap peak (86,160 B, on the
+  host) and the static stack below the binding (16,296 B) were measured on the
+  2026-10-05 fit build (`crypto/bpq/HARDWARE_FIT_RECEIPT.md`, a measurement tree,
+  not this commit); the MicroPython VM frames above the binding have no number
+  until it runs on a device. Universal T3W1 firmware includes this app from the
+  commit that lands the `bpq` feature; no such image has run on a device. The scons
+  build (`core/SConscript.*`) never carried bpq and still does not; xtask is the
+  build of record for it.
 - **Channel.** A post-quantum signature from the device is not post-quantum channel
   confidentiality (THP is Noise_XX, classical) and not device attestation.
 - **Audit.** mldsa-native, mlkem-native and the SPHINCS+ reference are third-party

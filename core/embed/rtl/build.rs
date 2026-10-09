@@ -314,10 +314,21 @@ fn add_crypto(lib: &mut xbuild::CLibrary) -> Result<()> {
         );
     }
 
-    // bpq: the device's own post-quantum identity (docs/bpq-device.md). Built
-    // into the universal emulator only; the hardware image is a separate,
-    // reviewed step, so a device build has neither this C nor the app above it.
-    if cfg!(feature = "universal_fw") && cfg!(feature = "emulator") {
+    // bpq: the device's own post-quantum identity (docs/bpq-device.md). A
+    // model-scoped cargo feature: only a model.toml that lists `bpq` gets this
+    // C, the trezorcrypto.bpq binding above it (USE_BPQ is a public define, so
+    // it reaches upymod) and the frozen app. Today that is universal T3W1
+    // firmware, hardware and emulator alike (a btc-only build has none of it).
+    // A cargo invocation that enables `bpq` for any other model is refused
+    // here, by model name.
+    if cfg!(feature = "bpq") && !xbuild::is_rust_analyzer() {
+        let model = xbuild::current_model_id()?;
+        ensure!(
+            model == "T3W1",
+            "bpq is model-scoped to T3W1; refusing to build it for model {model}"
+        );
+    }
+    if cfg!(feature = "universal_fw") && cfg!(feature = "bpq") {
         lib.add_include("../../vendor/mldsa-native/mldsa");
         lib.add_include("../../vendor/mlkem-native/mlkem");
         lib.add_define("USE_BPQ", None);

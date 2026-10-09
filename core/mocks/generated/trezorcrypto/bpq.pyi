@@ -30,7 +30,8 @@ def verify(public_key: AnyBytes, message: AnyBytes,
 # upymod/modtrezorcrypto/modtrezorcrypto-bpq.h
 def mldsa65_public_key(seed: AnyBytes) -> bytes:
     """
-    ML-DSA-65 public key from a 32-byte KeyGen seed (FIPS 204 KeyGen_internal).
+    ML-DSA-65 public key from a 32-byte KeyGen seed (FIPS 204
+    KeyGen_internal).
     """
 
 

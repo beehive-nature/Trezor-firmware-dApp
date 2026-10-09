@@ -310,6 +310,8 @@ UI_LAYOUT: str
 """UI layout identifier ("BOLT"-T, "CAESAR"-TS3, "DELIZIA"-TS5)."""
 USE_THP: bool
 """Whether the firmware supports Trezor-Host Protocol (version 2)."""
+USE_BPQ: bool
+"""Whether the firmware carries the device's own post-quantum identity (bpq)."""
 NOTIFY_BOOT: int
 """Notification event: boot completed."""
 NOTIFY_UNLOCK: int

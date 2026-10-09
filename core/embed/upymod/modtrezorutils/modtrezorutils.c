@@ -867,6 +867,8 @@ STATIC const mp_obj_tuple_t mod_trezorutils_version_obj = {
 /// """UI layout identifier ("BOLT"-T, "CAESAR"-TS3, "DELIZIA"-TS5)."""
 /// USE_THP: bool
 /// """Whether the firmware supports Trezor-Host Protocol (version 2)."""
+/// USE_BPQ: bool
+/// """Whether the firmware carries the device's own post-quantum identity (bpq)."""
 /// NOTIFY_BOOT: int
 /// """Notification event: boot completed."""
 /// NOTIFY_UNLOCK: int
@@ -1100,6 +1102,11 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_USE_THP), mp_const_true},
 #else
     {MP_ROM_QSTR(MP_QSTR_USE_THP), mp_const_false},
+#endif
+#ifdef USE_BPQ
+    {MP_ROM_QSTR(MP_QSTR_USE_BPQ), mp_const_true},
+#else
+    {MP_ROM_QSTR(MP_QSTR_USE_BPQ), mp_const_false},
 #endif
 #ifdef UI_LAYOUT_BOLT
     {MP_ROM_QSTR(MP_QSTR_UI_LAYOUT), MP_ROM_QSTR(MP_QSTR_BOLT)},

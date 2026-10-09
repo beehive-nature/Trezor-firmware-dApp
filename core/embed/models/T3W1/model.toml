@@ -30,4 +30,5 @@ features = [
     "layout_eckhart",
     "display_rgba8888",
     "eos",
+    "bpq",
 ]

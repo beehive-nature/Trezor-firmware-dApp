@@ -122,6 +122,10 @@ decred = ["upymod/decred"]
 eos = ["rtl/eos", "upymod/eos"]
 nem = ["rtl/nem", "upymod/nem"]
 
+# The device's own post-quantum identity (docs/bpq-device.md). Model-scoped:
+# only a model.toml that lists `bpq` gets it (T3W1).
+bpq = ["rtl/bpq", "upymod/bpq"]
+
 display_mono = ["trezor_lib/display_mono"]
 display_rgb565 = ["trezor_lib/display_rgb565"]
 display_rgba8888 = ["trezor_lib/display_rgba8888", "trezor_lib/ui_color_32bit"]

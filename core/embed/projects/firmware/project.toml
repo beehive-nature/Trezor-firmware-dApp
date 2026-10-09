@@ -41,6 +41,10 @@ uses = [
     "decred",
     "eos",
     "nem",
+
+    # The device's own post-quantum identity (docs/bpq-device.md); only a
+    # model.toml that lists it gets it.
+    "bpq",
 ]
 
 elf_sections = [".vendorheader", ".header", ".flash", ".data"]

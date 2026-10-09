@@ -19,6 +19,7 @@ models.workspace = true
 # --------------------------------------------------------------------------
 
 aes_gcm = []
+bpq = []
 ed25519_no_precomp = []
 emulator = ["insecure_prng", "models/emulator"]
 eos = []
