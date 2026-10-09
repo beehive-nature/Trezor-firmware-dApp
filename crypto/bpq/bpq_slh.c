@@ -57,7 +57,22 @@
 #include "../../vendor/sphincsplus/ref/address.c"
 #include "../../vendor/sphincsplus/ref/fips202.c"
 #include "../../vendor/sphincsplus/ref/hash_shake.c"
+/* merkle.c:29 assigns `unsigned steps[]` (merkle.c:25, the type chain_lengths
+ * takes, wots.h:23) to `uint32_t *wots_steps` (wotsx1.h:15). Both are 32 bits
+ * on every target this file builds for; the diagnostic is about two distinct
+ * types, not two sizes, and it fires only where the target spells uint32_t as
+ * `long unsigned int` (arm-none-eabi), not on x86-64 or i386 (`unsigned int`),
+ * so the emulator and the host test never see it. The pragma silences
+ * -Wincompatible-pointer-types for the merkle.c include only (that file and
+ * the headers it is first to pull in) and changes no code. The fix at the
+ * source is wotsx1.h:15 to `unsigned int *`:
+ * https://github.com/sphincs/sphincsplus/issues/70
+ * Delete this block once the pinned merkle.c builds for arm-none-eabi
+ * without it. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
 #include "../../vendor/sphincsplus/ref/merkle.c"
+#pragma GCC diagnostic pop
 #include "../../vendor/sphincsplus/ref/thash_shake_simple.c"
 #include "../../vendor/sphincsplus/ref/utils.c"
 #include "../../vendor/sphincsplus/ref/utilsx1.c"
